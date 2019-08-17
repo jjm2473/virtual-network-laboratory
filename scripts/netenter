@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# this is a script helps you to enter a network namespace
+# dependency: ip unshare
+
+ns=$1
+shift
+prog=${1:-bash}
+shift
+
+if [ -z "$ns" ]; then
+	echo "Usage: $0 NETNS [COMMAND [ARGS...]]"
+	exit -1
+fi
+
+sudo ip netns exec "$ns" unshare -u sh -c 'hostname $0;exec $*' "$ns" "$prog" $*
