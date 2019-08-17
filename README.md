@@ -9,7 +9,7 @@
     ```shell script
     java -jar vnet-lab.jar blueprint.json > network.sh && chmod 755 network.sh
     ```
-3. 创建虚拟网络:
+3. (之后的操作都在Linux下) 创建虚拟网络:
     ```shell script
     sudo ./network.sh create
     ```
