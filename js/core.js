@@ -66,28 +66,28 @@ fi
                 var node = this.nodeMap[peer.peer];
                 if (node.type == 'switch') {
                     sb += 'ip link set dev ' + iface + ' master ' + peer.peer;
-                    if (peer.if !== null) {
+                    if (typeof peer.if === 'string') {
                         sb += ' name ' + peer.if;
                         iface = peer.if;
                     }
                     sb += '\n';
                 } else {
                     if (node.type === 'root') {
-                        if (peer.if !== null) {
+                        if (typeof peer.if === 'string') {
                             sb += 'ip link set dev ' + iface + ' name ' + peer.if + '\n';
                             iface = peer.if;
                         }
                     } else {
                         sb += 'ip link set dev ' + iface + ' netns ' + peer.peer;
                         ns = peer.peer;
-                        if (peer.if !== null) {
+                        if (typeof peer.if === 'string') {
                             sb += ' name ' + peer.if;
                             iface = peer.if;
                         }
                         sb += '\n';
                     }
 
-                    if (peer.ipv4 !== null) {
+                    if (typeof peer.ipv4 === 'string') {
                         if (ns !== null) {
                             sb += 'ip netns exec ' + ns + ' ';
                         }
@@ -105,7 +105,7 @@ fi
 
         sb += '\n# config route\n';
         this.model.hosts.forEach(e => {
-            if (e.gateway !== null) {
+            if (typeof e.gateway === 'string') {
                 sb += 'ip netns exec ' + e.name + ' ip route add default via ' + e.gateway + '\n';
             }
         });
