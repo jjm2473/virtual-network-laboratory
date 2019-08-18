@@ -1,13 +1,23 @@
 # Virtual Network Laboratory
 
-基于Linux网络命名空间的虚拟网络实验室, 
-可根据[蓝图](#蓝图)创建一个虚拟的网络.
+> **基于Linux网络命名空间的虚拟网络实验室**
+
+这个项目包含教程, 案例, 以及一个编译器,
+编译器可将[蓝图](#蓝图)编译成一个Shell脚本, 这个脚本可以创建或者销毁虚拟网络.
+编译器已经用JavaScript重写, 可直接[在线编译](https://jjm2473.github.io/virtual-network-laboratory/), 不需要再用到Java环境.
 
 ### 常规工作流
 1. 首先根据需求编写[蓝图](#蓝图)文件, 假设保存到`blueprint.json`
-2. 把蓝图编译成shell脚本([下载vnet-lab.jar](https://github.com/jjm2473/virtual-network-laboratory/releases)):
+2. 把蓝图编译成Shell脚本, 推荐使用[在线编译器](https://jjm2473.github.io/virtual-network-laboratory/), 
+   编译结果下载到本地并增加执行权限`chmod 755 network.sh`; 
+   
+   也可以使用Java编译([下载vnet-lab.jar](https://github.com/jjm2473/virtual-network-laboratory/releases)):
     ```shell script
     java -jar vnet-lab.jar blueprint.json > network.sh && chmod 755 network.sh
+    ```
+   或者还能使用NodeJS编译:
+    ```shell script
+    node js/main_node.js blueprint.json > network.sh && chmod 755 network.sh
     ```
 3. (之后的操作都在Linux下) 创建虚拟网络:
     ```shell script
