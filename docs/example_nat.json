@@ -1,0 +1,95 @@
+{
+  "comment": "Internet with NAT, how to implements P2P connection?",
+  "hosts": [
+    {
+      "name": "internet",
+      "comment": "enable forwarding"
+    },
+    {
+      "name": "router1",
+      "gateway": "192.168.1.254",
+      "comment": "enable forwarding and NAT lan to wan"
+    },
+    {
+      "name": "router2",
+      "gateway": "192.168.2.254",
+      "comment": "enable forwarding and NAT lan to wan"
+    },
+    {
+      "name": "pc1",
+      "gateway": "192.168.65.254"
+    },
+    {
+      "name": "pc2",
+      "gateway": "192.168.65.254"
+    },
+    {
+      "name": "server",
+      "gateway": "192.168.3.254"
+    }
+  ],
+  "switches": [
+  ],
+  "links": [
+    {
+      "from": {
+        "peer": "pc1",
+        "if": "eth0",
+        "ipv4": "192.168.65.1/24"
+      },
+      "to": {
+        "peer": "router1",
+        "if": "lan",
+        "ipv4": "192.168.65.254/24"
+      }
+    },
+    {
+      "from": {
+        "peer": "pc2",
+        "if": "eth0",
+        "ipv4": "192.168.65.1/24"
+      },
+      "to": {
+        "peer": "router2",
+        "if": "lan",
+        "ipv4": "192.168.65.254/24"
+      }
+    },
+    {
+      "from": {
+        "peer": "internet",
+        "if": "net1",
+        "ipv4": "192.168.1.254/24"
+      },
+      "to": {
+        "peer": "router1",
+        "if": "wan",
+        "ipv4": "192.168.1.1/24"
+      }
+    },
+    {
+      "from": {
+        "peer": "internet",
+        "if": "net2",
+        "ipv4": "192.168.2.254/24"
+      },
+      "to": {
+        "peer": "router2",
+        "if": "wan",
+        "ipv4": "192.168.2.1/24"
+      }
+    },
+    {
+      "from": {
+        "peer": "internet",
+        "if": "net3",
+        "ipv4": "192.168.3.254/24"
+      },
+      "to": {
+        "peer": "server",
+        "if": "eth0",
+        "ipv4": "192.168.3.1/24"
+      }
+    }
+  ]
+}
