@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <meta name="author" content="jjm2473">
 
-    <title>虚拟网络实验室在线编译器</title>
+    <title>网络架构编辑器</title>
 
     <meta name="description" lang="zh" content="基于Linux网络命名空间的虚拟网络实验室">
     <meta name="description" content="Virtual Network Laboratory based on linux network namespace">
@@ -15,75 +15,237 @@
     <link rel="author" href="https://github.com/jjm2473">
 
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
-        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/fontawesome.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.10.2/css/solid.min.css">
 
-</head>
+    <style>
 
-<body>
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-12">
-                <h1>虚拟网络实验室在线编译器</h1>
-                <p>这里可以在线把蓝图编译成shell脚本, 如果不知道这个页面是干嘛的, 请先查看项目说明 <a href="https://github.com/jjm2473/virtual-network-laboratory">https://github.com/jjm2473/virtual-network-laboratory</a></p>
+      body {
+        position: absolute;      
+        width: 100%;
+        height: 100%;
+      }
+
+      #cy {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        z-index: 0;
+      }
+
+      #toolbar-container {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        background-color: #ffffff97;
+      }
+
+      #toolbar {
+        width: 100px;
+        height: 200px;
+        z-index: 1;
+      }
+
+      #property-container {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        bottom: 10px;
+        background-color: #ffffff97;
+      }
+
+      #property {
+        padding: 10px;
+        width: 220px;
+        z-index: 2;
+      }
+
+      #property.none {
+        display: none
+      }
+
+      #property div.setting-group {
+        display: none;
+      }
+
+      #property.host div.host-setting {
+        display: block;
+      }
+      #property.host div.node-setting {
+        display: block;
+      }
+      #property.switch div.node-setting {
+        display: block;
+      }
+      #property.port div.port-setting {
+        display: block;
+      }
+      .setting-row {
+        margin-bottom: 5px
+      }
+
+      .nav-divider {
+        width: 1px;
+        background-color: grey;
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+
+      h1 {
+        opacity: 0.5;
+        font-size: 1em;
+        font-weight: bold;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div style="position: relative;width: 100%;height: 100%; display: flex;flex-direction: column;">
+      <div >
+        <nav class="navbar navbar-expand navbar-light bg-light" style="width:100%">
+          <a class="navbar-brand" target="_blank" href="https://github.com/jjm2473/virtual-network-laboratory">虚拟网络实验室</a>
+          <a id="download_helper" target="_blank" download="file" style="display: none"></a>
+          <input type="file" id="upload_helper" style="display: none">
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="new" title="新建"><i class="fa fa-file"></i></button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="open"  title="打开项目"><i class="fa fa-file-alt"></i></button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="save"  title="保存项目"><i class="fa fa-save"></i></button>
+              </li>
+              <li class="nav-item">
+                <button disabled type="button" class="btn btn-light btn-lg action" value="import"  title="导入蓝图"><i class="fa fa-file-import"></i></button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="export"  title="导出蓝图"><i class="fa fa-file-export"></i></button>
+              </li>
+              <li class="nav-item nav-divider">
+                
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="build"  title="编译"><i class="fa fa-scroll"></i></button>
+              </li>
+              <li class="nav-item nav-divider">
+                
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="fit" title="查看全部"><i class="fa fa-expand"></i></button>
+              </li>
+              <li class="nav-item">
+                <button type="button" class="btn btn-light btn-lg action" value="orignal" title="1:1视图"><i class="fa fa-compress"></i></button>
+              </li>
+              <li class="nav-item nav-divider">
+                
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle btn-lg" href="javascript:void(0)" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fa fa-question-circle"></i>
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#operationModal">操作</a>
+                  <a class="dropdown-item" href="javascript:void(0)">快捷键</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="javascript:void(0)" data-toggle="modal" data-target="#aboutModal">关于</a>
+                </div>
+              </li>
+            </ul>
+            <div class="form-inline my-2 my-lg-0">
+              <input id="search_text" class="form-control mr-sm-2" type="text" placeholder="搜索选择节点" aria-label="Search">
+              <button id="search_button" class="btn btn-outline-success my-2 my-sm-0" >搜索</button>
             </div>
+          </div>
+        </nav>
+      </div>
+      <div style="position: relative;width: 100%;height: 100%;">
+        <div id="cy"></div>
+        <div id="toolbar-container" class="card">
+          <div id="toolbar"></div>
         </div>
-        <hr>
-        <div class="row">
-            <div class="col-xl-5 col-md-5">
-                <label for="input_file">选择或者粘贴蓝图</label>
-                <input id="input_file" type="file" accept="application/json" style="margin: 5px 0" class="form-control-file">
-                <textarea id="input_text" class="form-control" rows="15"></textarea>
-            </div>
-            <div class="col-xl-1 col-md-2">
-                <div style="display: flex;margin-left: -10px;margin-right: -10px;"><button id="compile" type="button" style="margin: 5px auto" class="btn btn-primary">编译=&gt;</button></div>
-            </div>
-            <div class="col-xl-6 col-md-5">
-                <textarea class="form-control" readonly id="output_text" rows="16"></textarea>
-                <div style="display: flex"><a id="download" href="#" target="_blank" style="margin: 5px auto" class="btn btn-primary disabled" download="vnet.sh">下载或另存为</a></div>
-            </div>
+        <div id="property-container" class="card">
+          <div id="property" class="none">
+            <form id="property-form">
+              <div class="node-setting port-setting setting-group">
+                <div class="setting-row form-group">
+                  <label for="name">名称: </label>
+                  <input class="form-control" type="text" name="name">
+                </div>
+                <div class="host-setting setting-group setting-row form-group">
+                  <label for="gateway">网关: </label>
+                  <input class="form-control" type="text" name="gateway">
+                </div>
+              </div>
+              <div class="port-setting setting-group setting-row form-group">
+                <label for="ipv4">IPv4: </label>
+                <input class="form-control" type="text" name="ipv4">
+              </div>
+              
+            </form>
+            <br/>
+            <button id="delete" type="button" name="delete" class="btn btn-dark btn-block" ><i class="fa fa-trash"></i>删除所选</button>
+          </div>
         </div>
+      </div>
     </div>
 
-    <!-- Optional JavaScript -->
-    <script src="js/core.js"></script>
-    <script>
-        (function(){
-            var inputText = document.getElementById('input_text');
-            var inputFile = document.getElementById('input_file');
-            inputFile.addEventListener('change', function() {
-                var file = this.files[0];
-                if (file.size > 1024*1024) {
-                    if (!confirm('你选择的文件超过1MB, 确定要加载?')) {
-                        inputFile.value = null;
-                        return;
-                    }
-                }
-                var reader = new FileReader();
-                reader.addEventListener('loadend', function(){
-                    inputText.value = reader.result;
-                });
-                reader.readAsText(file);
-            });
-            var outputText = document.getElementById('output_text');
-            var download = document.getElementById('download');
-            document.getElementById('compile').addEventListener('click', function() {
-                if (inputText.value === '') {
-                    alert('先选择或者粘贴蓝图');
-                    return;
-                }
-                try {
-                    var script = VNet.fromJson(inputText.value).script();
-                    outputText.value = script;
-                    var blob = new Blob([script], {type:'text/x-sh'});
-                    var url = URL.createObjectURL(blob);
-                    download.href = url;
-                    download.classList.remove('disabled');
-                } catch (e) {
-                    alert('ERROR:' + e);
-                }
-            });
-        })();
-    </script>
+    <!-- Modal -->
+    <div class="modal fade" id="operationModal" tabindex="-1" role="dialog" aria-labelledby="operationModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="operationModalLabel">操作</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <ul>
+              <li>工作区分为四部分, 上面是菜单栏, 左侧是工具栏, 中间是画板, 右侧是属性栏(可能未显示)</li>
+              <li>菜单栏可打开保存项目, 以及编译出Shell脚本</li>
+              <li>点击或拖动工具栏中的节点可在画板中创建相应节点</li>
+              <li>画板是主要操作区域, 鼠标停留在节点或者端口上面会出现红色圆点, 拖动圆点到另一个节点或者端口即可创建连接</li>
+              <li>根据当前选择的元素种类和数量, 属性栏可能显示或者隐藏, 属性栏可设置节点相关属性, 以及删除操作</li>
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" role="dialog" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="aboutModalLabel">关于</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                基于Linux网络命名空间的虚拟网络实验室
+              <a href="https://github.com/jjm2473/virtual-network-laboratory" target="_blank">https://github.com/jjm2473/virtual-network-laboratory</a>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js"
@@ -95,6 +257,570 @@
     <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
         crossorigin="anonymous"></script>
-</body>
 
+
+    <!-- <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script> -->
+
+    <!-- for testing with local version of cytoscape.js -->
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape@3.9.1/dist/cytoscape.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.15/lodash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cytoscape-edgehandles@3.6.0/cytoscape-edgehandles.min.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/graph.js"></script>
+    <script src="network_editor.js"></script>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function(){
+
+        var toolbar = initToolbar();
+        var property = initProperty();
+        var menu = initMenuBar(toolbar, property);
+        var elements = {
+            "nodes": [
+              {
+                "data": {
+                  "id": "node_1566665880346.3506",
+                  "type": "switch",
+                  "name": "switch"
+                },
+                "position": {
+                  "x": -56.64026118818978,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665880346.3506-handler",
+                  "type": "handler",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": -147.89026118818978,
+                  "y": -32.91573147520818
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665885035.9070",
+                  "type": "host",
+                  "name": "router",
+                  "gateway": "122.233.228.1"
+                },
+                "position": {
+                  "x": -57.71203514122645,
+                  "y": -131.59155132676284
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665885035.9070-handler",
+                  "type": "handler",
+                  "parent": "node_1566665885035.9070"
+                },
+                "position": {
+                  "x": -94.21203514122645,
+                  "y": -131.59155132676284
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665908947.7890",
+                  "type": "host",
+                  "name": "pc1",
+                  "gateway": "192.168.1.1"
+                },
+                "position": {
+                  "x": -223.68479771293306,
+                  "y": 93.78378769680715
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665908947.7890-handler",
+                  "type": "handler",
+                  "parent": "node_1566665908947.7890"
+                },
+                "position": {
+                  "x": -241.93479771293306,
+                  "y": 93.78378769680715
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665909773.7081",
+                  "type": "host",
+                  "name": "pc3",
+                  "gateway": "192.168.1.1"
+                },
+                "position": {
+                  "x": 36.582885222418724,
+                  "y": 96.90239331849904
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665909773.7081-handler",
+                  "type": "handler",
+                  "parent": "node_1566665909773.7081"
+                },
+                "position": {
+                  "x": 18.33288522241873,
+                  "y": 96.90239331849904
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665910227.486",
+                  "type": "host",
+                  "name": "pc2",
+                  "gateway": "192.168.1.1"
+                },
+                "position": {
+                  "x": -87.81883592970838,
+                  "y": 94.28340971529636
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665910227.486-handler",
+                  "type": "handler",
+                  "parent": "node_1566665910227.486"
+                },
+                "position": {
+                  "x": -106.06883592970838,
+                  "y": 94.28340971529636
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665929879.9515",
+                  "type": "host",
+                  "name": "internet"
+                },
+                "position": {
+                  "x": -58.057397363227025,
+                  "y": -225.10077854598188
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "node_1566665929879.9515-handler",
+                  "type": "handler",
+                  "parent": "node_1566665929879.9515"
+                },
+                "position": {
+                  "x": -76.30739736322703,
+                  "y": -225.10077854598188
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": false,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566665998913.7823",
+                  "parent": "node_1566665908947.7890",
+                  "name": "eth0",
+                  "ipv4": "192.168.1.2/24"
+                },
+                "position": {
+                  "x": -205.43479771293306,
+                  "y": 93.78378769680715
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666000057.3699",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": -111.39026118818978,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666001641.4940",
+                  "parent": "node_1566665910227.486",
+                  "name": "eth0",
+                  "ipv4": "192.168.1.3/24"
+                },
+                "position": {
+                  "x": -69.56883592970838,
+                  "y": 94.28340971529636
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666002577.2170",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": -74.89026118818978,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666003535.8404",
+                  "parent": "node_1566665909773.7081",
+                  "name": "eth0",
+                  "ipv4": "192.168.1.4/24"
+                },
+                "position": {
+                  "x": 54.83288522241873,
+                  "y": 96.90239331849904
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666004619.5635",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": -38.390261188189776,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666006586.7337",
+                  "parent": "node_1566665885035.9070",
+                  "name": "br-lan0",
+                  "ipv4": "192.168.1.1/24"
+                },
+                "position": {
+                  "x": -57.71203514122645,
+                  "y": -131.59155132676284
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666007842.6394",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": -1.8902611881897755,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666015509.7672",
+                  "parent": "node_1566665885035.9070",
+                  "name": "wan",
+                  "ipv4": "122.233.229.82/22"
+                },
+                "position": {
+                  "x": -21.212035141226455,
+                  "y": -131.59155132676284
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666016810.6134",
+                  "parent": "node_1566665929879.9515",
+                  "ipv4": "122.233.228.1/22"
+                },
+                "position": {
+                  "x": -39.807397363227025,
+                  "y": -225.10077854598188
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": false,
+                "pannable": false,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "tmp_1566666564263.72",
+                  "parent": "node_1566665880346.3506"
+                },
+                "position": {
+                  "x": 34.60973881181022,
+                  "y": -32.915731475208176
+                },
+                "group": "nodes",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": false,
+                "classes": ""
+              }
+            ],
+            "edges": [
+              {
+                "data": {
+                  "id": "b3b7724b-301c-4549-a871-b101c800a349",
+                  "source": "tmp_1566665998913.7823",
+                  "target": "tmp_1566666000057.3699"
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "group": "edges",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": true,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "ebe7a2f2-c12e-48ba-93d3-f76b0802f166",
+                  "source": "tmp_1566666001641.4940",
+                  "target": "tmp_1566666002577.2170"
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "group": "edges",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": true,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "e44a99e5-1536-44c3-b9be-d1f4439b0e17",
+                  "source": "tmp_1566666003535.8404",
+                  "target": "tmp_1566666004619.5635"
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "group": "edges",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": true,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "49d815bd-8c24-425f-90f6-c7be379ebf00",
+                  "source": "tmp_1566666006586.7337",
+                  "target": "tmp_1566666007842.6394"
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "group": "edges",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": true,
+                "classes": ""
+              },
+              {
+                "data": {
+                  "id": "66b3cf2a-04bb-4e14-8cc9-62b44666144a",
+                  "source": "tmp_1566666015509.7672",
+                  "target": "tmp_1566666016810.6134"
+                },
+                "position": {
+                  "x": 0,
+                  "y": 0
+                },
+                "group": "edges",
+                "removed": false,
+                "selected": false,
+                "selectable": true,
+                "locked": false,
+                "grabbable": true,
+                "pannable": true,
+                "classes": ""
+              }
+            ]
+          };
+
+          menu.open(elements);
+      });
+    </script>
+  </body>
 </html>
