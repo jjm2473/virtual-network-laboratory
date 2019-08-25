@@ -183,3 +183,15 @@ sudo iptables -t nat -A POSTROUTING -s 192.168.64.0/18 -o eth0 -j MASQUERADE
 好耶, pc可以访问外网了! (如果pc还是上不了网, 是不是因为宿主机本来就不能上网??)
 
 本例完结, 其实宿主机也被当成路由器了.
+
+### TODO
+- 核心
+    - 支持路由表配置
+    - 支持NAT配置
+- 图形编辑器
+    - 支持导入蓝图
+    - 撤销/重做
+    - 快捷键
+    - 错误检查
+- 其他
+    - 是否可以利用[JSLinux](https://bellard.org/jslinux/)让整个系统运行在浏览器中?
