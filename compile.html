@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta name="author" content="jjm2473">
+
+    <title>虚拟网络实验室在线编译器</title>
+
+    <meta name="description" lang="zh" content="基于Linux网络命名空间的虚拟网络实验室">
+    <meta name="description" content="Virtual Network Laboratory based on linux network namespace">
+    <meta name="keywords" content="network-namespace,linux-network-namespace,network-virtualization,networking,virtualization">
+
+    <link rel="author" href="https://github.com/jjm2473">
+
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <h1>虚拟网络实验室在线编译器</h1>
+                <p>这里可以在线把蓝图编译成shell脚本, 如果不知道这个页面是干嘛的, 请先查看项目说明 <a href="https://github.com/jjm2473/virtual-network-laboratory">https://github.com/jjm2473/virtual-network-laboratory</a></p>
+            </div>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-xl-5 col-md-5">
+                <label for="input_file">选择或者粘贴蓝图</label>
+                <input id="input_file" type="file" accept="application/json" style="margin: 5px 0" class="form-control-file">
+                <textarea id="input_text" class="form-control" rows="15"></textarea>
+            </div>
+            <div class="col-xl-1 col-md-2">
+                <div style="display: flex;margin-left: -10px;margin-right: -10px;"><button id="compile" type="button" style="margin: 5px auto" class="btn btn-primary">编译=&gt;</button></div>
+            </div>
+            <div class="col-xl-6 col-md-5">
+                <textarea class="form-control" readonly id="output_text" rows="16"></textarea>
+                <div style="display: flex"><a id="download" href="#" target="_blank" style="margin: 5px auto" class="btn btn-primary disabled" download="vnet.sh">下载或另存为</a></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Optional JavaScript -->
+    <script src="js/core.js"></script>
+    <script>
+        (function(){
+            var inputText = document.getElementById('input_text');
+            var inputFile = document.getElementById('input_file');
+            inputFile.addEventListener('change', function() {
+                var file = this.files[0];
+                if (file.size > 1024*1024) {
+                    if (!confirm('你选择的文件超过1MB, 确定要加载?')) {
+                        inputFile.value = null;
+                        return;
+                    }
+                }
+                var reader = new FileReader();
+                reader.addEventListener('loadend', function(){
+                    inputText.value = reader.result;
+                });
+                reader.readAsText(file);
+            });
+            var outputText = document.getElementById('output_text');
+            var download = document.getElementById('download');
+            document.getElementById('compile').addEventListener('click', function() {
+                if (inputText.value === '') {
+                    alert('先选择或者粘贴蓝图');
+                    return;
+                }
+                try {
+                    var script = VNet.fromJson(inputText.value).script();
+                    outputText.value = script;
+                    var blob = new Blob([script], {type:'text/x-sh'});
+                    var url = URL.createObjectURL(blob);
+                    download.href = url;
+                    download.classList.remove('disabled');
+                } catch (e) {
+                    alert('ERROR:' + e);
+                }
+            });
+        })();
+    </script>
+
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>

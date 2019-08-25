@@ -2,23 +2,13 @@
 
 > **基于Linux网络命名空间的虚拟网络实验室**
 
-这个项目包含教程, 案例, 以及一个编译器,
-编译器可将[蓝图](#蓝图)编译成一个Shell脚本, 这个脚本可以创建或者销毁虚拟网络.
-编译器已经用JavaScript重写, 可直接[在线编译](https://jjm2473.github.io/virtual-network-laboratory/), 不需要再用到Java环境.
+这个项目包含一个[图形编辑器](https://jjm2473.github.io/virtual-network-laboratory/), 以及教程, 案例;
+图形编辑器可编译出一个Shell脚本, 这个脚本可以创建或者销毁虚拟网络. 
+项目已经用JavaScript重写, 可直接[在线编辑编译](https://jjm2473.github.io/virtual-network-laboratory/), 不需要再用到Java环境.
 
 ### 常规工作流
-1. 首先根据需求编写[蓝图](#蓝图)文件, 假设保存到`blueprint.json`
-2. 把蓝图编译成Shell脚本, 推荐使用[在线编译器](https://jjm2473.github.io/virtual-network-laboratory/), 
-   编译结果下载到本地并增加执行权限`chmod 755 network.sh`; 
-   
-   也可以使用Java编译([下载vnet-lab.jar](https://github.com/jjm2473/virtual-network-laboratory/releases)):
-    ```shell script
-    java -jar vnet-lab.jar blueprint.json > network.sh && chmod 755 network.sh
-    ```
-   或者还能使用NodeJS编译:
-    ```shell script
-    node js/main_node.js blueprint.json > network.sh && chmod 755 network.sh
-    ```
+1. 首先根据需求在[图形编辑器](https://jjm2473.github.io/virtual-network-laboratory/)拖出相应的网络架构;
+2. 在菜单栏点编译, 生成Shell脚本, 编译结果下载到本地并增加执行权限`chmod 755 network.sh`; 
 3. (之后的操作都在Linux下) 创建虚拟网络:
     ```shell script
     sudo ./network.sh create
@@ -38,6 +28,28 @@
     sudo ./network.sh destory
     ```
 
+### 图形编辑器
+
+图形编辑器中有三种角色, 分别是:
+
+1. 主机(hosts)
+   > 主机对应Linux中一个网络命名空间, 主机同时也可能是路由器, 看你怎么配置.
+     主机有两个属性: 
+   1. 名称: 主机的名称, 即命名空间的名称, 不可重复
+   2. 网关: 默认网关, 可以不指定 
+2. 交换机(switches)
+   > 交换机对应一个虚拟bridge设备, 交换机只有一个属性:
+   1. 名称: 交换机的名称, 不可重复
+3. 链路(links)
+   > 主机和交换机有多个网口, 不同主机或交换机的两个网口连接形成链路.
+    每条链路有两个网口, 每个网口有三个属性:
+   1. 名称: 此端口在节点中的接口名称, 可以不指定
+   2. IPv4: 配置此端口的ipv4地址, 可以不指定
+
+需要注意的是所有交换机都在宿主机的根命名空间里, 所以交换机的名称不能重复.
+
+图形编辑器中可导出[蓝图](#蓝图), 蓝图即网络架构信息, 不包含图形相关信息.
+
 ### 蓝图
 [蓝图示例](docs/example.json)
 
@@ -49,7 +61,7 @@
    1. name: 主机的名称, 即命名空间的名称, 不可重复
    2. gateway: 默认网关, 可不指定 
 2. 交换机(switches)
-   > 交换机对应一个虚拟bridge设备, 交换机只要一个属性:
+   > 交换机对应一个虚拟bridge设备, 交换机只有一个属性:
    1. name: 交换机的名称, 不可重复
 3. 链路(links)
    > 链路对应一对veth设备, 相当于网线, 用于连接主机或者交换机.
@@ -62,6 +74,8 @@
 需要注意的是交换机和连接到交换机的端口都在宿主机的根命名空间里, 所以交换机的名称不能重复, 
 连接到所有交换机的所有端口的接口名称也不能重复.
 
+蓝图可单独[在线编译](https://jjm2473.github.io/virtual-network-laboratory/compile.html)成Shell脚本.
+
 ### 案例
 要实现的网络拓扑:
 ```text
@@ -73,18 +87,16 @@
        /   \     /   \
      pc1  pc2  pc3   pc4
 ```
-~ ___宿主机___ 即当前运行Linux的机器, 蓝图中用`root`表示;
+~ ___宿主机___ 即当前运行Linux的机器, 图形编辑器和蓝图中用`root`表示;
 
 ~ ___路由器___ 并非现代意义上的路由器, 而是一台普通的主机, 跟 ___交换机1___ 和 ___交换机2___ 合在一起更像是现代的路由器; 
 
-此网络拓扑对应的蓝图文件是 [docs/example.json](docs/example.json).
+此网络拓扑对应的项目文件是 [docs/example.prj.json](docs/example.prj.json).
 
 最终要实现的是pc之间互通, pc可以连接外网.
 
-编译蓝图:
-```shell script
-java -jar vnet-lab.jar docs/example.json > example.sh && chmod 755 example.sh
-```
+打开[图形编辑器](https://jjm2473.github.io/virtual-network-laboratory/), 在图形编辑器中拖出网络拓扑或者直接打开示例项目文件 [docs/example.prj.json](docs/example.prj.json), 在菜单栏点编译, 生成Shell脚本, 编译结果下载到本地命名为`example.sh`并增加执行权限`chmod 755 example.sh`; 
+
 之后的命令都在Linux上执行;
 
 创建虚拟网络:

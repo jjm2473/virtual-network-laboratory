@@ -128,8 +128,7 @@ fi
     };
 }
 
-VNet.fromJson = function(json) {
-    var net = JSON.parse(json);
+VNet.fromJsonObj = function(net) {
     var nodeMap = {};
     net.hosts.forEach(e => {
         e.type = 'host';
@@ -151,6 +150,10 @@ VNet.fromJson = function(json) {
     });
 
     return new VNet(net, nodeMap);
+};
+VNet.fromJson = function(json) {
+    var net = JSON.parse(json);
+    return VNet.fromJsonObj(net);
 };
 
 return VNet;
